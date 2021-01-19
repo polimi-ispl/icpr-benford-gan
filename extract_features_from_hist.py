@@ -10,8 +10,8 @@ from scipy.optimize import curve_fit
 from scipy.stats import entropy
 from tqdm import tqdm
 
-from params import feature_hist_root, coeff_list, base_list, compression_list, dataset_ext, results_root, \
-    feature_div_root
+from params import features_hist_root, coeff_list, base_list, compression_list, dataset_ext, results_root, \
+    features_div_root
 
 warnings.simplefilter('ignore')
 
@@ -96,22 +96,22 @@ def main():
     task_name = __file__.split('/')[-1].split('.')[0]
     print('TASK: {}'.format(task_name))
 
-    os.makedirs(os.path.join(results_root, task_name), exist_ok=True)
+    os.makedirs(os.path.join(results_root, task_name),  mode=0o755, exist_ok=True)
 
     params_range = list(product(coeff_list, base_list, compression_list))
     p = Pool(workers)
 
-    feature_compact_dir = feature_div_root + '_recompression{}'.format(
-        recompression_qf_suf) if jpeg_recompression else feature_div_root
+    feature_compact_dir = features_div_root + '_recompression{}'.format(
+        recompression_qf_suf) if jpeg_recompression else features_div_root
 
-    feature_dir = feature_hist_root + '_recompression{}'.format(
-        recompression_qf_suf) if jpeg_recompression else feature_hist_root
+    feature_dir = features_hist_root + '_recompression{}'.format(
+        recompression_qf_suf) if jpeg_recompression else features_hist_root
 
     for coeff, base, compression in params_range:
         for dataset_name, _ in tqdm(dataset_ext.items(), desc='fc_{}_{}_{}'.format(compression, base, coeff)):
             feature_compact_path = os.path.join(feature_compact_dir, compression, 'b{}'.format(base),
                                                 'c{}'.format(coeff), '{}.pkl'.format(dataset_name))
-            os.makedirs(os.path.dirname(feature_compact_path), exist_ok=True)
+            os.makedirs(os.path.dirname(feature_compact_path),  mode=0o755, xist_ok=True)
 
             if os.path.isfile(feature_compact_path):
                 print('{} Already exist, skipping..'.format(feature_compact_path))
