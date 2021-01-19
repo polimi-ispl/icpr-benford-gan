@@ -10,7 +10,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import entropy
 from tqdm import tqdm
 
-from params import features_hist_root, coeff_list, base_list, compression_list, dataset_ext, results_root, \
+from params import fd_hist_root, coeff_list, base_list, compression_list, dataset_ext, results_root, \
     features_div_root
 
 warnings.simplefilter('ignore')
@@ -83,7 +83,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--jpeg_recompression', action='store_true', default=False)
     parser.add_argument('--recompression_qf', type=int)
-    parser.add_argument('--workers', type=int, default=cpu_count() - 4)
+    parser.add_argument('--workers', help='Number of parallel workers', type=int, default=cpu_count() // 2)
 
     args = parser.parse_args()
     jpeg_recompression = args.jpeg_recompression
@@ -96,29 +96,32 @@ def main():
     task_name = __file__.split('/')[-1].split('.')[0]
     print('TASK: {}'.format(task_name))
 
-    os.makedirs(os.path.join(results_root, task_name),  mode=0o755, exist_ok=True)
-
     params_range = list(product(coeff_list, base_list, compression_list))
     p = Pool(workers)
 
-    feature_compact_dir = features_div_root + '_recompression{}'.format(
+    feature_div_dir = features_div_root + '_recompression{}'.format(
         recompression_qf_suf) if jpeg_recompression else features_div_root
 
-    feature_dir = features_hist_root + '_recompression{}'.format(
-        recompression_qf_suf) if jpeg_recompression else features_hist_root
+    feature_dir = fd_hist_root + '_recompression{}'.format(
+        recompression_qf_suf) if jpeg_recompression else fd_hist_root
 
     for coeff, base, compression in params_range:
-        for dataset_name, _ in tqdm(dataset_ext.items(), desc='fc_{}_{}_{}'.format(compression, base, coeff)):
-            feature_compact_path = os.path.join(feature_compact_dir, compression, 'b{}'.format(base),
-                                                'c{}'.format(coeff), '{}.pkl'.format(dataset_name))
-            os.makedirs(os.path.dirname(feature_compact_path),  mode=0o755, xist_ok=True)
+        for dataset_name, _ in tqdm(dataset_ext.items(), desc='feature_{}_{}_{}'.format(compression, base, coeff)):
+            feature_div_path = os.path.join(feature_div_dir, compression, 'b{}'.format(base),
+                                            'c{}'.format(coeff), '{}.pkl'.format(dataset_name))
+            os.makedirs(os.path.dirname(feature_div_path), mode=0o755, exist_ok=True)
 
-            if os.path.isfile(feature_compact_path):
-                print('{} Already exist, skipping..'.format(feature_compact_path))
+            if os.path.isfile(feature_div_path):
+                print('{} Already exist, skipping..'.format(feature_div_path))
                 continue
 
             # Loading histograms
-            hist = np.load(os.path.join(feature_dir, '{}/b{}/{}.npy'.format(compression, base, dataset_name)))
+            try:
+                hist = np.load(os.path.join(feature_dir, '{}/b{}/{}.npy'.format(compression, base, dataset_name)))
+            except(FileNotFoundError):
+                print(f'You must first compute first digits '
+                      f'for {dataset_name}, compression: {compression}, base: {base}. Skipping...')
+                continue
             # Computing features
             ff = p.map(feature_extraction, hist[:, coeff])
 
@@ -126,7 +129,7 @@ def main():
 
             ff_df = pd.DataFrame(data=ff, columns=['mse', 'popt_0', 'popt_1', 'popt_2', 'kl', 'reny', 'tsallis'])
 
-            ff_df.to_pickle(feature_compact_path)
+            ff_df.to_pickle(feature_div_path)
 
     return 0
 

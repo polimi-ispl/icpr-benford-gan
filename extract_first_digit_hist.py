@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from params import base_list, dataset_root, dataset_ext, features_hist_root, tmp_path
+from params import base_list, dataset_root, dataset_ext, fd_hist_root, tmp_path
 
 np.random.seed(21)
 
@@ -121,10 +121,9 @@ def main():
 
     recompression_qf_suf = '_{}'.format(recompression_qf)
 
-    # create temporary folder
+    # create temporary folder to store the intermediate jpeg files
     os.makedirs(tmp_path, mode=0o755, exist_ok=True)
 
-    dataset_list = []
     if dataset_name is None:
         dataset_list = [x for x in dataset_ext.keys()]
     else:
@@ -143,9 +142,9 @@ def main():
 
             # check if already computed
             compression = 'jpeg_{}'.format(jpeg_qf)
-            feature_dir = features_hist_root + '_recompression{}'.format(
-                recompression_qf_suf) if jpeg_recompression else features_hist_root
-            dir_name = os.path.join(feature_dir, compression, 'b{}'.format(base))
+            fd_hist_dir = fd_hist_root + '_recompression{}'.format(
+                recompression_qf_suf) if jpeg_recompression else fd_hist_root
+            dir_name = os.path.join(fd_hist_dir, compression, 'b{}'.format(base))
             out_name = os.path.join(dir_name, '{}.npy'.format(dataset_name))
 
             if os.path.exists(out_name):
@@ -156,7 +155,6 @@ def main():
                                                                              jpeg_recompression))
                 continue
             else:
-
                 # prepare arguments
                 args_list = list()
                 for path in path_list:
@@ -171,19 +169,18 @@ def main():
                 # compute first digits
                 p = Pool(workers, maxtasksperchild=2)
 
-                print('\nComputing first digits for {}, base {}, compression {}, {} images'.format(dataset_name, base,
-                                                                                                   jpeg_qf,
-                                                                                                   len(args_list)))
+                print('Computing first digits for {}, base {}, compression {}, {} images'.format(dataset_name, base,
+                                                                                                 jpeg_qf,
+                                                                                                 len(args_list)))
 
                 ff = p.map(first_digit_call, args_list)
                 ff = np.asarray(ff)
 
                 # saving features
-                print('Saving features')
-                os.makedirs(dir_name, exist_ok=True)
+                os.makedirs(dir_name, mode=0o755, exist_ok=True)
                 np.save(out_name, ff)
 
-                print('Cleaning unused variables')
+                # cleaning unused variables
                 del ff
                 tmp_file_list = glob.glob(os.path.join(tmp_path, '*.jpg'))
                 [os.remove(x) for x in tmp_file_list]

@@ -208,8 +208,8 @@ gan_orig_map_faces = {'celeb256_gan': 'celeb256_orig',
 popt_dict = {'scale': 0, 'alpha': 1, 'beta': 2}
 
 features_root = os.path.join(root_dir, 'features')
-features_hist_root = os.path.join(features_root, 'features_hist')
-features_div_root = os.path.join(root_dir, 'features_div')
+fd_hist_root = os.path.join(features_root, 'fd_hist')
+features_div_root = os.path.join(features_root, 'features_div')
 cooccurrences_root = os.path.join(root_dir, 'cooccurrences')
 data_root = os.path.join(root_dir, 'data')
 runs_root = os.path.join(root_dir, 'runs')
