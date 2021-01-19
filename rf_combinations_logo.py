@@ -59,7 +59,7 @@ def main():
 
     for comp, base, coeff in tqdm(params_range):
 
-        name = 'ff_comp_{}_base_{}_coeff_{}_subsample_{}.npy'.format(comp, base, coeff, subsampling)
+        name = 'ff_{}_base_{}_coeff_{}_subsample_{}.npy'.format(comp, base, coeff, subsampling)
         if os.path.exists(os.path.join(results_root, task_name, name)):
             print('{} already exists, skipping...'.format(name))
             continue

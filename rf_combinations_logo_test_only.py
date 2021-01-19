@@ -20,6 +20,7 @@ def main():
                         default=False)
     parser.add_argument('--param_idx', required=False, type=int, help='List of specific index for param list',
                         nargs='*')
+    parser.add_argument('--subsampling', type=float, default=0.3)
     parser.add_argument('--recompression_qf', type=int)
 
     args = parser.parse_args()
@@ -27,6 +28,7 @@ def main():
     test_compression = args.test_compression
     param_idx = args.param_idx
     recompression_qf = args.recompression_qf
+    subsampling = args.subsampling
 
     np.random.seed(21)
 
@@ -55,13 +57,12 @@ def main():
 
     for comp, base, coeff in tqdm(params_range):
 
-        name = 'ff_comp_{}_base_{}_coeff_{}.npy'.format(comp, base, coeff)
+        name = 'ff_{}_base_{}_coeff_{}.npy'.format(comp, base, coeff)
 
         ff_list, y_list, y_logo_list = load_features(comp, base, coeff, features_div_dir)
 
         # Subsampling
-        sub_idx = np.random.choice(np.arange(len(ff_list)), int(len(ff_list) // 3))
-
+        sub_idx = np.random.choice(np.arange(len(ff_list)), int(len(ff_list) // subsampling))
         X = ff_list[sub_idx]
         y = y_list[sub_idx]
         y_logo = y_logo_list[sub_idx]
