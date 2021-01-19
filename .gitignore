@@ -1,0 +1,13 @@
+.idea/
+
+notebook/.DS_Store
+
+log/~$rf_vs_cnn.xlsx
+
+.DS_Store
+
+*.zip
+
+extract_benford_features/
+
+stress_test.py
