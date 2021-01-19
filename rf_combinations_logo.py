@@ -1,17 +1,15 @@
 import argparse
-import glob
 import os
 import warnings
 from multiprocessing import cpu_count
 
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import LeaveOneGroupOut, cross_validate
 from tqdm import tqdm
 
-from functions import get_params_range
-from params import dataset_ext, results_root, features_div_root, dataset_label
+from functions import get_params_range, load_features
+from params import results_root, features_div_root
 
 warnings.simplefilter('ignore')
 
@@ -66,47 +64,7 @@ def main():
             print('{} already exists, skipping...'.format(name))
             continue
 
-        ff_list = []
-        y_list = []
-        y_logo_list = []
-        # Loading Features
-        for dataset_name, _ in dataset_ext.items():
-            ff_same_param = []
-            y_same_param = []
-            y_logo_same_param = []
-            y_orig_flag = True
-            y_gan_flag = True
-            for j in comp:
-                for b in base:
-                    for c in coeff:
-                        feature_compact_path = glob.glob(os.path.join(features_div_dir,
-                                                                      'jpeg_{}/b{}/c{}/{}.pkl'.format(j, b, c,
-                                                                                                      dataset_name)))[0]
-                        dataset_logo_label = dataset_label[dataset_name]
-
-                        ff = pd.read_pickle(feature_compact_path)
-
-                        ff_same_param += [np.concatenate([ff['kl'][:, None],
-                                                          ff['reny'][:, None],
-                                                          ff['tsallis'][:, None]],
-                                                         axis=-1)]
-
-                        if '_orig' in dataset_name and y_orig_flag:
-                            y_same_param += [0] * len(ff)
-                            y_logo_same_param += [dataset_logo_label] * len(ff)
-                            y_orig_flag = False
-                        elif '_gan' in dataset_name and y_gan_flag:
-                            y_same_param += [1] * len(ff)
-                            y_logo_same_param += [dataset_logo_label] * len(ff)
-                            y_gan_flag = False
-
-            ff_list += [np.concatenate(ff_same_param, axis=1)]
-            y_list += y_same_param
-            y_logo_list += y_logo_same_param
-
-        ff_list = np.concatenate(ff_list, axis=0)
-        y_list = np.array(y_list)
-        y_logo_list = np.array(y_logo_list)
+        ff_list, y_list, y_logo_list = load_features(comp, base, coeff, features_div_dir)
 
         # Subsampling
         sub_idx = np.random.choice(np.arange(len(ff_list)), int(np.round(len(ff_list) * subsampling)))
