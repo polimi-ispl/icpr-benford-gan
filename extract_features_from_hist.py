@@ -10,8 +10,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import entropy
 from tqdm import tqdm
 
-from params import fd_hist_root, coeff_list, base_list, compression_list, dataset_ext, results_root, \
-    features_div_root
+from params import fd_hist_root, coeff_list, base_list, compression_list, dataset_ext, features_div_root
 
 warnings.simplefilter('ignore')
 
