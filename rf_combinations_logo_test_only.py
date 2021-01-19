@@ -2,15 +2,14 @@ import argparse
 import glob
 import os
 import warnings
-from itertools import product
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import balanced_accuracy_score
 from tqdm import tqdm
 
-from functions import all_subsets
-from params import dataset_ext, results_root, features_div_root, dataset_label, coeff_list, base_list, jpeg_list
+from functions import get_params_range
+from params import dataset_ext, results_root, features_div_root, dataset_label
 
 warnings.simplefilter('ignore')
 
@@ -36,7 +35,7 @@ def main():
     task_name_no_suffix = 'rf_combinations_logo'
     print('TASK: {}'.format(task_name_no_suffix))
 
-    recompression_qf_suf = '_{}'.format(recompression_qf)
+    recompression_qf_suf = '_{}'.format(recompression_qf) if recompression_qf is not None else ''
     suffix = '_train-compression_{}{}_test-compression_{}'.format(train_compression, recompression_qf_suf,
                                                                     test_compression)
     suffix_neg = '_train-compression_{}{}_test-compression_{}'.format(train_compression, recompression_qf_suf,
@@ -44,27 +43,21 @@ def main():
     task_name = task_name_no_suffix + suffix
     task_name_neg = task_name_no_suffix + suffix_neg
 
-    feature_compact_dir = features_div_root + '_recompression{}'.format(
+    features_div_dir = features_div_root + '_recompression{}'.format(
         recompression_qf_suf) if test_compression else features_div_root
 
     os.makedirs(os.path.join(results_root, task_name), exist_ok=True)
 
-    feature_type = ''
-    if feature_type != '':
-        feature_type = '_' + feature_type
-
-    coeff_range = np.asarray([np.asarray(range(x)) for x in np.asarray(range(len(coeff_list))) + 1])
-    base_range = np.asarray(list(all_subsets(base_list)))
-    comp_range = [tuple(jpeg_list[:i + 1]) for i in range(len(jpeg_list))]
-
-    params_range = list(product(comp_range, base_range, coeff_range))
+    all_params_range = get_params_range()
 
     if param_idx is not None:
-        params_range = [params_range[x] for x in param_idx]
+        params_range = [all_params_range[x] for x in param_idx]
+    else:
+        params_range = all_params_range
 
     for comp, base, coeff in tqdm(params_range):
 
-        name = 'ff{}_comp_{}_base_{}_coeff_{}.npy'.format(feature_type, comp, base, coeff)
+        name = 'ff_comp_{}_base_{}_coeff_{}.npy'.format(comp, base, coeff)
 
         ff_list = []
         y_list = []
@@ -79,16 +72,16 @@ def main():
             for j in comp:
                 for b in base:
                     for c in coeff:
-                        feature_compact_path = glob.glob(os.path.join(feature_compact_dir,
+                        feature_compact_path = glob.glob(os.path.join(features_div_dir,
                                                                       'jpeg_{}/b{}/c{}/{}.pkl'.format(j, b, c,
                                                                                                       dataset_name)))[0]
                         dataset_logo_label = dataset_label[dataset_name]
 
                         ff = pd.read_pickle(feature_compact_path)
 
-                        ff_same_param += [np.concatenate([ff['kl{}'.format(feature_type)][:, None],
-                                                          ff['reny{}'.format(feature_type)][:, None],
-                                                          ff['tsallis{}'.format(feature_type)][:, None]],
+                        ff_same_param += [np.concatenate([ff['kl'][:, None],
+                                                          ff['reny'][:, None],
+                                                          ff['tsallis'][:, None]],
                                                          axis=-1)]
 
                         if '_orig' in dataset_name and y_orig_flag:
