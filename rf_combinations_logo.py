@@ -92,7 +92,7 @@ def main():
         print('\n\n\nTotal {} samples, Leave-One-Group-Out cv. Feature size: {}\n\n\n'.format(X.shape[0],
                                                                                               X.shape[1]))
 
-        # Create a based model
+        # Create model
         rf = RandomForestClassifier(n_jobs=workers, bootstrap=True, n_estimators=100, criterion='gini')
 
         # LOGO cv policy
