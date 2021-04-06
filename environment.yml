@@ -1,0 +1,29 @@
+name: benford-gan2
+channels:
+  - https://repo.anaconda.com/pkgs/free
+  - conda-forge
+  - defaults
+dependencies:
+  - cudnn=7.6.0=cuda10.1_0
+  - h5py=2.9.0=nompi_py36hf008753_1102
+  - hdf5=1.10.4=nompi_h3c11f04_1106
+  - jpeg=8d=h516909a_0
+  - jupyter=1.0.0=py_2
+  - keras=2.3.1=py36_0
+  - numpy=1.16.2=py36h8b7e671_1
+  - pandas=0.24.2=py36hf484d3e_0
+  - pillow=6.2.1=py36h6b7be26_0
+  - pip=19.3.1=py36_0
+  - python=3.6.7=h357f687_1005
+  - scikit-image=0.16.2=py36hb3f55d8_0
+  - scikit-learn=0.21.2=py36h627018c_0
+  - scipy=1.2.1=py36h09a28d5_1
+  - setuptools=41.4.0=py36_0
+  - tensorboard=1.14.0=py36_0
+  - tensorflow=1.14.0=gpu_py36h3fb9ad6_0
+  - tensorflow-base=1.14.0=gpu_py36he45bfe2_0
+  - tensorflow-estimator=1.14.0=py36h5ca1d4c_0
+  - tensorflow-gpu=1.14.0=h0d30ee6_0
+  - tqdm=4.36.1=py_0
+  - pip:
+    - opencv-python==4.2.0.32
