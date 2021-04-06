@@ -80,8 +80,9 @@ def feature_extraction(ff: np.ndarray):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jpeg_recompression', action='store_true', default=False)
-    parser.add_argument('--recompression_qf', type=int)
+    parser.add_argument('--jpeg_recompression', help='Whether to recompress the image or not',
+                        action='store_true', default=False)
+    parser.add_argument('--recompression_qf', help='The JPEG Quality Factor for recompression', type=int)
     parser.add_argument('--workers', help='Number of parallel workers', type=int, default=cpu_count() // 2)
 
     args = parser.parse_args()
