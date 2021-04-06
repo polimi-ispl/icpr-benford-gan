@@ -1,4 +1,6 @@
 # On the use of Benford's law to detect GAN-generated images
+![](misc/readme_img.png)
+
 This is the official implementation of the paper **On the use of Benford's law to detect GAN-generated images**,
 accepted to [ICPR2020](http://www.icpr2020.it/) and currently available on [arXiv](https://arxiv.org/abs/2004.07682).
 
